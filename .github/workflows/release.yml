@@ -1,0 +1,117 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*' # Run workflow on version tags, e.g. v1.0.0
+
+jobs:
+  build:
+    name: Build and Release
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # Build for major platforms (Windows, macOS, Linux)
+        goos: [linux, windows, darwin]
+        goarch: [amd64, arm64]
+        exclude:
+          # Exclude some combinations that don't need to be built
+          - goos: windows
+            goarch: arm64
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21.x' # Match the version used in go.mod
+          check-latest: true
+
+      - name: Get dependencies
+        run: go mod download
+
+      - name: Run tests
+        run: go test -v ./...
+
+      - name: Build binary
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: |
+          # Determine the file extension based on OS
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            EXTENSION=".exe"
+          else
+            EXTENSION=""
+          fi
+
+          # Build the binary
+          go build -v -o "push_up_tracker${EXTENSION}" main.go
+
+          # Create release directory structure
+          mkdir -p release_dir/templates
+          mkdir -p release_dir/static
+
+          # Copy binary
+          cp "push_up_tracker${EXTENSION}" release_dir/
+
+          # Copy assets
+          cp -r templates/* release_dir/templates/
+          cp -r static/* release_dir/static/
+          cp .env.example release_dir/
+          cp README.release.md release_dir/README.md
+
+          # Copy Makefile for Linux/macOS builds
+          if [ "${{ matrix.goos }}" != "windows" ]; then
+            cp Makefile.release release_dir/Makefile
+          fi
+
+          # Copy systemd service file for Linux builds
+          if [ "${{ matrix.goos }}" = "linux" ]; then
+            cp push_up_tracker.service release_dir/
+          fi
+
+          # Create archive
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            cd release_dir && zip -r "../push_up_tracker_${{ matrix.goos }}_${{ matrix.goarch }}.zip" .
+          else
+            cd release_dir && tar -czvf "../push_up_tracker_${{ matrix.goos }}_${{ matrix.goarch }}.tar.gz" .
+          fi
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: push_up_tracker_${{ matrix.goos }}_${{ matrix.goarch }}
+          path: |
+            push_up_tracker_${{ matrix.goos }}_${{ matrix.goarch }}*.*
+          if-no-files-found: error
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: List artifacts
+        run: find artifacts -type f | sort
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: artifacts/**/*
+          draft: false
+          prerelease: false
+          generate_release_notes: true
