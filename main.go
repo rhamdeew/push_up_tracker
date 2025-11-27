@@ -30,8 +30,8 @@ type DayData struct {
 }
 
 type StreakData struct {
-	Current  int `json:"current"`
-	Longest  int `json:"longest"`
+	Current  int    `json:"current"`
+	Longest  int    `json:"longest"`
 	LastDate string `json:"lastDate"`
 }
 
@@ -60,14 +60,14 @@ func main() {
 	// Initialize BoltDB
 	var err error
 	dbPath := filepath.Join(".", "pushups.db")
-	
+
 	// Ensure working directory is the installation directory
 	workingDir := os.Getenv("PWD")
 	if workingDir == "" {
 		workingDir = "."
 	}
 	dbPath = filepath.Join(workingDir, "pushups.db")
-	
+
 	db, err = bolt.Open(dbPath, 0600, nil)
 	if err != nil {
 		log.Fatal(err)
@@ -127,18 +127,18 @@ func main() {
 
 func initializeTodayCount() {
 	today := time.Now().Format("2006-01-02")
-	
+
 	err := db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("Days"))
 		data := b.Get([]byte(today))
-		
+
 		if data == nil {
 			// Check if this is the first day (database initialization)
 			firstDay, err := getFirstDay(tx)
 			if err != nil {
 				return err
 			}
-			
+
 			if firstDay == "" {
 				// Database is empty, this is initialization day
 				firstDay = today
@@ -154,27 +154,27 @@ func initializeTodayCount() {
 					return err
 				}
 				daysSince := int(time.Since(firstDayTime).Hours() / 24)
-				
+
 				// Apply new progression rules
 				todayTarget = calculateTarget(10, daysSince)
 			}
-			
+
 			dayData := DayData{
 				Date:  today,
 				Count: todayTarget,
 				Done:  false,
 			}
-			
+
 			jsonData, err := json.Marshal(dayData)
 			if err != nil {
 				return err
 			}
-			
+
 			err = b.Put([]byte(today), jsonData)
 			if err != nil {
 				return err
 			}
-			
+
 			todayCount = todayTarget
 		} else {
 			var dayData DayData
@@ -184,10 +184,10 @@ func initializeTodayCount() {
 			}
 			todayCount = dayData.Count
 		}
-		
+
 		return nil
 	})
-	
+
 	if err != nil {
 		log.Printf("Error initializing today count: %v", err)
 	}
@@ -196,7 +196,7 @@ func initializeTodayCount() {
 // calculateTarget calculates the target count based on progression rules
 func calculateTarget(startCount, daysSince int) int {
 	target := startCount
-	
+
 	for i := 0; i < daysSince; i++ {
 		if target < 50 {
 			// Increase by 2 when count < 50
@@ -216,7 +216,7 @@ func calculateTarget(startCount, daysSince int) int {
 			break
 		}
 	}
-	
+
 	return target
 }
 
@@ -255,26 +255,26 @@ func setFirstDay(tx *bolt.Tx, firstDay string) error {
 
 func handleToday(w http.ResponseWriter, r *http.Request) {
 	today := time.Now().Format("2006-01-02")
-	
+
 	err := db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("Days"))
 		data := b.Get([]byte(today))
-		
+
 		if data == nil {
 			return fmt.Errorf("no data for today")
 		}
-		
+
 		var dayData DayData
 		err := json.Unmarshal(data, &dayData)
 		if err != nil {
 			return err
 		}
-		
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(dayData)
 		return nil
 	})
-	
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -285,13 +285,13 @@ func handleTodayComplete(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	
+
 	today := time.Now().Format("2006-01-02")
-	
+
 	err := db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("Days"))
 		data := b.Get([]byte(today))
-		
+
 		var dayData DayData
 		if data != nil {
 			err := json.Unmarshal(data, &dayData)
@@ -305,27 +305,27 @@ func handleTodayComplete(w http.ResponseWriter, r *http.Request) {
 				Done:  false,
 			}
 		}
-		
+
 		dayData.Done = true
-		
+
 		jsonData, err := json.Marshal(dayData)
 		if err != nil {
 			return err
 		}
-		
+
 		err = b.Put([]byte(today), jsonData)
 		if err != nil {
 			return err
 		}
-		
+
 		// Update streak
 		updateStreak(tx, today)
-		
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(dayData)
 		return nil
 	})
-	
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -334,23 +334,23 @@ func handleTodayComplete(w http.ResponseWriter, r *http.Request) {
 func updateStreak(tx *bolt.Tx, today string) {
 	b := tx.Bucket([]byte("Streak"))
 	data := b.Get([]byte("current"))
-	
+
 	var streak StreakData
 	if data != nil {
 		json.Unmarshal(data, &streak)
 	}
-	
+
 	todayTime, _ := time.Parse("2006-01-02", today)
 	yesterday := todayTime.AddDate(0, 0, -1).Format("2006-01-02")
-	
+
 	// Check if yesterday was completed
 	daysBucket := tx.Bucket([]byte("Days"))
 	yesterdayData := daysBucket.Get([]byte(yesterday))
-	
+
 	if yesterdayData != nil {
 		var yesterdayDayData DayData
 		json.Unmarshal(yesterdayData, &yesterdayDayData)
-		
+
 		if yesterdayDayData.Done {
 			streak.Current++
 		} else {
@@ -359,13 +359,13 @@ func updateStreak(tx *bolt.Tx, today string) {
 	} else {
 		streak.Current = 1
 	}
-	
+
 	if streak.Current > streak.Longest {
 		streak.Longest = streak.Current
 	}
-	
+
 	streak.LastDate = today
-	
+
 	jsonData, _ := json.Marshal(streak)
 	b.Put([]byte("current"), jsonData)
 }
@@ -375,11 +375,11 @@ func handleCalendar(w http.ResponseWriter, r *http.Request) {
 	if year == "" {
 		year = strconv.Itoa(time.Now().Year())
 	}
-	
+
 	var firstRecordDate string
 	err := db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("Days"))
-		
+
 		cursor := b.Cursor()
 		k, _ := cursor.First()
 		if k != nil {
@@ -387,12 +387,12 @@ func handleCalendar(w http.ResponseWriter, r *http.Request) {
 		}
 		return nil
 	})
-	
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	
+
 	var startMonth, startYear int
 	if firstRecordDate != "" {
 		firstDate, err := time.Parse("2006-01-02", firstRecordDate)
@@ -408,12 +408,12 @@ func handleCalendar(w http.ResponseWriter, r *http.Request) {
 		startMonth = int(now.Month() - 1) // Convert to 0-based
 		startYear = now.Year()
 	}
-	
+
 	calendar := make(map[string]DayData)
-	
+
 	err = db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("Days"))
-		
+
 		cursor := b.Cursor()
 		for k, v := cursor.First(); k != nil; k, v = cursor.Next() {
 			dateStr := string(k)
@@ -428,24 +428,24 @@ func handleCalendar(w http.ResponseWriter, r *http.Request) {
 		}
 		return nil
 	})
-	
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	
+
 	response := struct {
-		Year         int                  `json:"year"`
-		StartMonth   int                  `json:"startMonth"`
-		StartYear    int                  `json:"startYear"`
-		Days         map[string]DayData   `json:"days"`
+		Year       int                `json:"year"`
+		StartMonth int                `json:"startMonth"`
+		StartYear  int                `json:"startYear"`
+		Days       map[string]DayData `json:"days"`
 	}{
 		Year:       time.Now().Year(),
 		StartMonth: startMonth,
 		StartYear:  startYear,
 		Days:       calendar,
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
@@ -454,7 +454,7 @@ func handleStreak(w http.ResponseWriter, r *http.Request) {
 	err := db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("Streak"))
 		data := b.Get([]byte("current"))
-		
+
 		var streak StreakData
 		if data != nil {
 			err := json.Unmarshal(data, &streak)
@@ -468,12 +468,12 @@ func handleStreak(w http.ResponseWriter, r *http.Request) {
 				LastDate: "",
 			}
 		}
-		
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(streak)
 		return nil
 	})
-	
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}

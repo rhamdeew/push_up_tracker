@@ -23,7 +23,7 @@ func setupTestDB(t *testing.T) *bolt.DB {
 	if err != nil {
 		t.Fatalf("Failed to create test DB: %v", err)
 	}
-	
+
 	// Create test data
 	err = db.Update(func(tx *bolt.Tx) error {
 		_, err := tx.CreateBucketIfNotExists([]byte("Days"))
@@ -43,7 +43,7 @@ func setupTestDB(t *testing.T) *bolt.DB {
 	if err != nil {
 		t.Fatalf("Failed to setup test DB: %v", err)
 	}
-	
+
 	return db
 }
 
@@ -55,43 +55,43 @@ func cleanupTestDB(t *testing.T, db *bolt.DB) {
 
 func TestBasicAuth(t *testing.T) {
 	tests := []struct {
-		name     string
-		username  string
-		password  string
-		user      string
-		pass      string
+		name       string
+		username   string
+		password   string
+		user       string
+		pass       string
 		expectAuth bool
 	}{
 		{
-			name:      "Valid credentials",
-			username:  "admin",
-			password:  "admin",
-			user:      "admin",
-			pass:      "admin",
+			name:       "Valid credentials",
+			username:   "admin",
+			password:   "admin",
+			user:       "admin",
+			pass:       "admin",
 			expectAuth: true,
 		},
 		{
-			name:      "Invalid username",
-			username:  "admin",
-			password:  "admin",
-			user:      "wrong",
-			pass:      "admin",
+			name:       "Invalid username",
+			username:   "admin",
+			password:   "admin",
+			user:       "wrong",
+			pass:       "admin",
 			expectAuth: false,
 		},
 		{
-			name:      "Invalid password",
-			username:  "admin",
-			password:  "admin",
-			user:      "admin",
-			pass:      "wrong",
+			name:       "Invalid password",
+			username:   "admin",
+			password:   "admin",
+			user:       "admin",
+			pass:       "wrong",
 			expectAuth: false,
 		},
 		{
-			name:      "Missing credentials",
-			username:  "admin",
-			password:  "admin",
-			user:      "",
-			pass:      "",
+			name:       "Missing credentials",
+			username:   "admin",
+			password:   "admin",
+			user:       "",
+			pass:       "",
 			expectAuth: false,
 		},
 	}
@@ -186,14 +186,14 @@ func TestProgressiveLoad(t *testing.T) {
 		targetDate    string
 		expectedCount int
 	}{
-		{"Day 1", "2024-01-01", 10},          // Start at 10
-		{"Day 2", "2024-01-02", 12},          // +2 (10+2)
-		{"Day 10", "2024-01-10", 28},         // +2 each day for 9 days (10+9*2)
-		{"Day 25", "2024-01-25", 54},         // Reached 50, now +1 per day
-		{"Day 65", "2024-03-05", 94},         // Almost at 100
-		{"Day 75", "2024-03-15", 102},        // After 100, +1 every 2 days
-		{"Day 269", "2024-09-26", 200},       // Reached maximum of 200
-		{"Day 365", "2024-12-31", 200},       // Stay at 200 permanently
+		{"Day 1", "2024-01-01", 10},    // Start at 10
+		{"Day 2", "2024-01-02", 12},    // +2 (10+2)
+		{"Day 10", "2024-01-10", 28},   // +2 each day for 9 days (10+9*2)
+		{"Day 25", "2024-01-25", 54},   // Reached 50, now +1 per day
+		{"Day 65", "2024-03-05", 94},   // Almost at 100
+		{"Day 75", "2024-03-15", 102},  // After 100, +1 every 2 days
+		{"Day 269", "2024-09-26", 200}, // Reached maximum of 200
+		{"Day 365", "2024-12-31", 200}, // Stay at 200 permanently
 	}
 
 	for _, tt := range tests {
@@ -207,10 +207,10 @@ func TestProgressiveLoad(t *testing.T) {
 				firstDay = fd
 				return nil
 			})
-			
+
 			firstTime, _ := time.Parse("2006-01-02", firstDay)
 			targetTime, _ := time.Parse("2006-01-02", tt.targetDate)
-			
+
 			daysSince := int(targetTime.Sub(firstTime).Hours() / 24)
 			expected := calculateTarget(10, daysSince)
 
@@ -229,7 +229,7 @@ func TestDayDataOperations(t *testing.T) {
 	dayData := DayData{
 		Date:  "2024-01-01",
 		Count: 5,
-		Done:   true,
+		Done:  true,
 	}
 
 	jsonData, _ := json.Marshal(dayData)
@@ -315,7 +315,7 @@ func TestStaticFileSecurity(t *testing.T) {
 	// Test static file handler security
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path[1:]
-		
+
 		// Validate path to prevent directory traversal
 		if !strings.HasPrefix(path, "static/") {
 			http.NotFound(w, r)
@@ -362,14 +362,14 @@ func TestCalendarMonthLogic(t *testing.T) {
 	// Test the actual logic used in the app
 	// Current month is the actual current month from time.Now()
 	// Previous month logic is: month < currentMonth && month >= startMonth
-	
+
 	currentMonth := 10 // October for consistent testing
-	startMonth := 0 // First record in January
-	
+	startMonth := 0    // First record in January
+
 	tests := []struct {
-		name               string
-		monthNumber       int
-		expectPrevious     bool
+		name           string
+		monthNumber    int
+		expectPrevious bool
 	}{
 		{"January (month 0) - before current month, after start", 0, true},
 		{"September (month 9) - before current month, after start", 9, true},
@@ -382,7 +382,7 @@ func TestCalendarMonthLogic(t *testing.T) {
 			// JavaScript logic: const isPreviousMonth = month < currentMonth && month >= startMonth;
 			isPrevious := (tt.monthNumber < currentMonth) && (tt.monthNumber >= startMonth)
 			if isPrevious != tt.expectPrevious {
-				t.Errorf("Expected previous=%v for month %d with current month %d and start month %d", 
+				t.Errorf("Expected previous=%v for month %d with current month %d and start month %d",
 					tt.expectPrevious, tt.monthNumber, currentMonth, startMonth)
 			}
 		})
@@ -398,19 +398,19 @@ func TestMain(t *testing.T) {
 func TestMainInitialization(t *testing.T) {
 	// Test the initialization part of main() without starting the server
 	// This simulates the environment variable handling and DB setup
-	
+
 	// Save original environment variables
 	origPort := os.Getenv("PORT")
 	origUsername := os.Getenv("USERNAME")
 	origPassword := os.Getenv("PASSWORD")
 	origPWD := os.Getenv("PWD")
-	
+
 	// Set test environment variables
 	os.Setenv("PORT", "9000")
 	os.Setenv("USERNAME", "testuser")
 	os.Setenv("PASSWORD", "testpass")
 	os.Setenv("PWD", "/tmp")
-	
+
 	// Clean up environment after test
 	defer func() {
 		if origPort == "" {
@@ -418,19 +418,19 @@ func TestMainInitialization(t *testing.T) {
 		} else {
 			os.Setenv("PORT", origPort)
 		}
-		
+
 		if origUsername == "" {
 			os.Unsetenv("USERNAME")
 		} else {
 			os.Setenv("USERNAME", origUsername)
 		}
-		
+
 		if origPassword == "" {
 			os.Unsetenv("PASSWORD")
 		} else {
 			os.Setenv("PASSWORD", origPassword)
 		}
-		
+
 		if origPWD == "" {
 			os.Unsetenv("PWD")
 		} else {
@@ -446,7 +446,7 @@ func TestMainInitialization(t *testing.T) {
 	if port != "9000" {
 		t.Errorf("Expected port to be 9000, got %s", port)
 	}
-	
+
 	username := os.Getenv("USERNAME")
 	if username == "" {
 		username = "admin"
@@ -454,7 +454,7 @@ func TestMainInitialization(t *testing.T) {
 	if username != "testuser" {
 		t.Errorf("Expected username to be testuser, got %s", username)
 	}
-	
+
 	password := os.Getenv("PASSWORD")
 	if password == "" {
 		password = "admin"
@@ -462,7 +462,7 @@ func TestMainInitialization(t *testing.T) {
 	if password != "testpass" {
 		t.Errorf("Expected password to be testpass, got %s", password)
 	}
-	
+
 	// Test default values when environment variables are not set
 	os.Unsetenv("PORT")
 	port = os.Getenv("PORT")
@@ -484,9 +484,9 @@ func TestMainSetup(t *testing.T) {
 	origTmpl := tmpl
 	origTodayCount := todayCount
 	origTodayTarget := todayTarget
-	
+
 	db = testDB
-	defer func() { 
+	defer func() {
 		db = origDB
 		tmpl = origTmpl
 		todayCount = origTodayCount
@@ -521,7 +521,7 @@ func TestMainSetup(t *testing.T) {
 		firstDay = fd
 		return nil
 	})
-	
+
 	if firstDay == "" {
 		t.Errorf("Expected first day to be set, got empty string")
 	}
@@ -559,10 +559,10 @@ func TestMainSetup(t *testing.T) {
 	// Test marshal error case
 	// This isn't easy to test without modifying the function itself,
 	// so let's focus on other error paths
-	
+
 	// Test closing DB to induce error
 	testDB.Close()
-	
+
 	// This should log an error but not panic
 	initializeTodayCount()
 }
@@ -576,7 +576,7 @@ func TestInitializeTodayCount(t *testing.T) {
 	origTodayCount := todayCount
 	origTodayTarget := todayTarget
 	db = testDB
-	defer func() { 
+	defer func() {
 		db = origDB
 		todayCount = origTodayCount
 		todayTarget = origTodayTarget
@@ -587,7 +587,7 @@ func TestInitializeTodayCount(t *testing.T) {
 
 	// Test 1: First day initialization
 	today := time.Now().Format("2006-01-02")
-	
+
 	err := testDB.Update(func(tx *bolt.Tx) error {
 		// Clear any existing config
 		b := tx.Bucket([]byte("Config"))
@@ -614,7 +614,7 @@ func TestInitializeTodayCount(t *testing.T) {
 		firstDay = fd
 		return nil
 	})
-	
+
 	if firstDay != today {
 		t.Errorf("Expected first day to be today (%s), got %s", today, firstDay)
 	}
@@ -629,7 +629,7 @@ func TestInitializeTodayCount(t *testing.T) {
 		}
 		return json.Unmarshal(data, &dayData)
 	})
-	
+
 	if dayData.Date != today {
 		t.Errorf("Expected date %s, got %s", today, dayData.Date)
 	}
@@ -642,7 +642,7 @@ func TestInitializeTodayCount(t *testing.T) {
 
 	// Test 2: Subsequent day initialization with existing first day
 	tomorrow := time.Now().AddDate(0, 0, 1).Format("2006-01-02")
-	
+
 	// Create data for tomorrow to simulate subsequent day
 	tomorrowDayData := DayData{
 		Date:  tomorrow,
@@ -650,7 +650,7 @@ func TestInitializeTodayCount(t *testing.T) {
 		Done:  false,
 	}
 	tomorrowJSON, _ := json.Marshal(tomorrowDayData)
-	
+
 	err = testDB.Update(func(tx *bolt.Tx) error {
 		daysB := tx.Bucket([]byte("Days"))
 		return daysB.Put([]byte(tomorrow), tomorrowJSON)
@@ -686,7 +686,7 @@ func TestInitializeTodayCount(t *testing.T) {
 		}
 		return json.Unmarshal(data, &dayData)
 	})
-	
+
 	if dayData.Count != 15 { // Should be the original value, not 10
 		t.Errorf("Expected count 15 to be preserved, got %d", dayData.Count)
 	}
@@ -708,7 +708,7 @@ func TestHandleIndex(t *testing.T) {
 	origDB := db
 	origTmpl := tmpl
 	db = testDB
-	defer func() { 
+	defer func() {
 		db = origDB
 		tmpl = origTmpl
 	}()
@@ -735,7 +735,7 @@ func TestHandleIndex(t *testing.T) {
 	// Test 2: With invalid template path
 	// Create a template that will fail to execute
 	tmpl = template.New("invalid")
-	
+
 	req = httptest.NewRequest("GET", "/", nil)
 	req.SetBasicAuth("admin", "admin")
 	w = httptest.NewRecorder()
@@ -759,14 +759,14 @@ func TestHandleToday(t *testing.T) {
 
 	// Test retrieving today's data
 	today := time.Now().Format("2006-01-02")
-	
+
 	// Add test data
 	dayData := DayData{
 		Date:  today,
 		Count: 15,
 		Done:  false,
 	}
-	
+
 	jsonData, _ := json.Marshal(dayData)
 	err := testDB.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("Days"))
@@ -852,7 +852,7 @@ func TestHandleTodayComplete(t *testing.T) {
 	origDB := db
 	origTodayCount := todayCount
 	db = testDB
-	defer func() { 
+	defer func() {
 		db = origDB
 		todayCount = origTodayCount
 	}()
@@ -866,7 +866,7 @@ func TestHandleTodayComplete(t *testing.T) {
 		Count: 15,
 		Done:  false,
 	}
-	
+
 	jsonData, _ := json.Marshal(dayData)
 	err := testDB.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("Days"))
@@ -941,7 +941,7 @@ func TestHandleTodayComplete(t *testing.T) {
 	// Test 4: Database error case
 	// Close the database to induce an error
 	testDB.Close()
-	
+
 	req = httptest.NewRequest("POST", "/api/today/complete", nil)
 	req.SetBasicAuth("admin", "admin")
 	w = httptest.NewRecorder()
@@ -961,7 +961,7 @@ func TestHandleTodayCompleteErrorCases(t *testing.T) {
 	origDB := db
 	origTodayCount := todayCount
 	db = testDB
-	defer func() { 
+	defer func() {
 		db = origDB
 		todayCount = origTodayCount
 	}()
@@ -1038,7 +1038,7 @@ func TestUpdateStreak(t *testing.T) {
 		Done:  true,
 	}
 	yesterdayJSON, _ := json.Marshal(yesterdayData)
-	
+
 	err = testDB.Update(func(tx *bolt.Tx) error {
 		// Add yesterday's data
 		b := tx.Bucket([]byte("Days"))
@@ -1046,7 +1046,7 @@ func TestUpdateStreak(t *testing.T) {
 		if err != nil {
 			return err
 		}
-		
+
 		// Set initial streak to 1 (yesterday's streak)
 		streak := StreakData{
 			Current:  1,
@@ -1091,7 +1091,7 @@ func TestUpdateStreak(t *testing.T) {
 		Done:  false,
 	}
 	yesterdayNotDoneJSON, _ := json.Marshal(yesterdayNotDone)
-	
+
 	err = testDB.Update(func(tx *bolt.Tx) error {
 		// Update yesterday's data to not done
 		b := tx.Bucket([]byte("Days"))
@@ -1099,7 +1099,7 @@ func TestUpdateStreak(t *testing.T) {
 		if err != nil {
 			return err
 		}
-		
+
 		// Set initial streak to 1 (yesterday's streak)
 		streak := StreakData{
 			Current:  1,
@@ -1148,7 +1148,7 @@ func TestHandleCalendar(t *testing.T) {
 	defer func() { db = origDB }()
 
 	year := strconv.Itoa(time.Now().Year())
-	
+
 	// Test case 1: No records
 	req := httptest.NewRequest("GET", "/api/calendar?year="+year, nil)
 	req.SetBasicAuth("admin", "admin")
@@ -1162,10 +1162,10 @@ func TestHandleCalendar(t *testing.T) {
 
 	// Verify the response structure
 	var response struct {
-		Year       int                    `json:"year"`
-		StartMonth int                    `json:"startMonth"`
-		StartYear  int                    `json:"startYear"`
-		Days       map[string]DayData     `json:"days"`
+		Year       int                `json:"year"`
+		StartMonth int                `json:"startMonth"`
+		StartYear  int                `json:"startYear"`
+		Days       map[string]DayData `json:"days"`
 	}
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	if err != nil {
@@ -1184,7 +1184,7 @@ func TestHandleCalendar(t *testing.T) {
 		Done:  true,
 	}
 	dayDataJSON, _ := json.Marshal(dayData)
-	
+
 	err = testDB.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("Days"))
 		return b.Put([]byte(testDate), dayDataJSON)
@@ -1223,7 +1223,7 @@ func TestHandleCalendar(t *testing.T) {
 	// Test case 3: Different year (should only include data from that year)
 	nextYear := strconv.Itoa(time.Now().Year() + 1)
 	nextYearDate := nextYear + "-01-01"
-	
+
 	// Add a date for next year
 	nextYearData := DayData{
 		Date:  nextYearDate,
@@ -1231,7 +1231,7 @@ func TestHandleCalendar(t *testing.T) {
 		Done:  true,
 	}
 	nextYearJSON, _ := json.Marshal(nextYearData)
-	
+
 	err = testDB.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("Days"))
 		return b.Put([]byte(nextYearDate), nextYearJSON)
@@ -1239,7 +1239,7 @@ func TestHandleCalendar(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to add test data for next year: %v", err)
 	}
-	
+
 	req = httptest.NewRequest("GET", "/api/calendar?year="+nextYear, nil)
 	req.SetBasicAuth("admin", "admin")
 	w = httptest.NewRecorder()
@@ -1255,7 +1255,7 @@ func TestHandleCalendar(t *testing.T) {
 	if _, exists := response.Days[nextYearDate]; !exists {
 		t.Errorf("Expected to find data for date %s in next year response", nextYearDate)
 	}
-	
+
 	// Should have at least one entry
 	if len(response.Days) < 1 {
 		t.Errorf("Expected at least 1 entry for year %s, got %d", nextYear, len(response.Days))
@@ -1326,7 +1326,7 @@ func TestHandleCalendarErrorCases(t *testing.T) {
 
 	// Test database error case
 	testDB.Close()
-	
+
 	year := strconv.Itoa(time.Now().Year())
 	req := httptest.NewRequest("GET", "/api/calendar?year="+year, nil)
 	req.SetBasicAuth("admin", "admin")
@@ -1384,7 +1384,7 @@ func TestHandleStreak(t *testing.T) {
 		LastDate: time.Now().Format("2006-01-02"),
 	}
 	streakDataJSON, _ := json.Marshal(streakData)
-	
+
 	err = testDB.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("Streak"))
 		return b.Put([]byte("current"), streakDataJSON)
@@ -1414,7 +1414,7 @@ func TestHandleStreak(t *testing.T) {
 	if streak.Longest != 10 {
 		t.Errorf("Expected longest streak to be 10, got %d", streak.Longest)
 	}
-	
+
 	// Test case 3: Invalid streak data in database
 	invalidJSON := []byte("{invalid json}")
 	err = testDB.Update(func(tx *bolt.Tx) error {
