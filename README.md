@@ -2,6 +2,14 @@
 
 A simple web application for tracking daily push-ups with BoltDB storage and basic authentication.
 
+![CI/CD Status](https://github.com/rhamdeew/push_up_tracker/actions/workflows/release.yml/badge.svg)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/rhamdeew/push_up_tracker)](https://github.com/rhamdeew/push_up_tracker/releases/latest)
+[![GitHub license](https://img.shields.io/github/license/rhamdeew/push_up_tracker)](https://github.com/rhamdeew/push_up_tracker/blob/main/LICENSE)
+[![Go Report Card](https://goreportcard.com/badge/github.com/rhamdeew/push_up_tracker)](https://goreportcard.com/report/github.com/rhamdeew/push_up_tracker)
+[![GitHub stars](https://img.shields.io/github/stars/rhamdeew/push_up_tracker)](https://github.com/rhamdeew/push_up_tracker/stargazers)
+
+![Push Up Tracker](https://github.com/user-attachments/assets/2254b540-dd1b-4400-82d1-a5e6b8bb0723)
+
 ## Features
 
 - Single-user push-up tracking
