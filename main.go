@@ -146,7 +146,7 @@ func initializeTodayCount() {
 				if err != nil {
 					return err
 				}
-				todayTarget = 5
+				todayTarget = 10
 			} else {
 				// Calculate days since first day
 				firstDayTime, err := time.Parse("2006-01-02", firstDay)
@@ -154,7 +154,9 @@ func initializeTodayCount() {
 					return err
 				}
 				daysSince := int(time.Since(firstDayTime).Hours() / 24)
-				todayTarget = 5 + daysSince
+				
+				// Apply new progression rules
+				todayTarget = calculateTarget(10, daysSince)
 			}
 			
 			dayData := DayData{
@@ -189,6 +191,33 @@ func initializeTodayCount() {
 	if err != nil {
 		log.Printf("Error initializing today count: %v", err)
 	}
+}
+
+// calculateTarget calculates the target count based on progression rules
+func calculateTarget(startCount, daysSince int) int {
+	target := startCount
+	
+	for i := 0; i < daysSince; i++ {
+		if target < 50 {
+			// Increase by 2 when count < 50
+			target += 2
+		} else if target >= 50 && target < 100 {
+			// Increase by 1 when count >= 50 and < 100
+			target += 1
+		} else if target >= 100 && target < 200 {
+			// Increase by 1 every 2 days when count >= 100 and < 200
+			if i%2 == 0 { // Only increase on even days (every other day)
+				target += 1
+			}
+		}
+		// When target reaches 200, stop increasing
+		if target >= 200 {
+			target = 200
+			break
+		}
+	}
+	
+	return target
 }
 
 func basicAuth(next http.HandlerFunc, username, password string) http.HandlerFunc {

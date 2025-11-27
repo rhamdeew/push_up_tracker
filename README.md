@@ -5,12 +5,37 @@ A simple web application for tracking daily push-ups with BoltDB storage and bas
 ## Features
 
 - Single-user push-up tracking
-- Progressive daily targets (starts at 5 push-ups, increases by 1 each day)
+- Progressive daily targets with structured progression
 - Visual calendar with completion tracking
 - Current and longest streak tracking
 - BoltDB for local data storage
 - Basic authentication support
 - Responsive web interface
+
+## Daily Target Progression
+
+The application uses a structured progression system that increases push-up targets based on your current level:
+
+| Phase | Target Range | Increment Rule | Description |
+|-------|-------------|----------------|-------------|
+| Beginner | 10-49 | +2 per day | Quick progression to build foundation |
+| Intermediate | 50-99 | +1 per day | Steady progression as difficulty increases |
+| Advanced | 100-199 | +1 every 2 days | Slower progression for high-volume training |
+| Elite | 200+ | No increase | Maximum daily target reached |
+
+### Progression Timeline
+
+- **Day 1**: Start with 10 push-ups
+- **Day 20-25**: Reach 50 push-ups
+- **Day 70-75**: Reach 100 push-ups  
+- **Day 269**: Reach maximum of 200 push-ups
+- **Day 270+**: Maintain at 200 push-ups
+
+This progression creates a balanced training program that:
+1. Builds initial strength quickly with +2 daily increases
+2. Provides steady progression with +1 daily increases in the intermediate phase
+3. Implements recovery time with +1 every 2 days in the advanced phase
+4. Prevents overtraining by capping at 200 push-ups per day
 
 ## Quick Start with Make
 
@@ -56,23 +81,6 @@ The application can be configured using a `.env` file or environment variables:
 - `PASSWORD` - Basic auth password (default: admin)
 
 During installation, `.env.example` is copied to `/opt/push_up_tracker/.env`. Edit this file to customize your configuration.
-- Security settings in `[Service]` section
-
-### Multiple Environments
-For different configurations:
-```bash
-# Development
-make generate-service
-cp push_up_tracker.service push_up_tracker-dev.service
-# Edit dev service
-sudo cp push_up_tracker-dev.service /etc/systemd/system/
-sudo systemctl start push_up_tracker-dev
-
-# Production  
-make generate-service
-# Edit production service
-make install
-```
 
 ### Uninstall
 ```bash

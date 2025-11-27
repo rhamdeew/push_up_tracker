@@ -1,4 +1,4 @@
-.PHONY: build run clean all test test-coverage lint deps install uninstall
+.PHONY: build run clean all test test-coverage deps install uninstall help
 
 # Variables
 BINARY_NAME=push_up_tracker
@@ -9,7 +9,7 @@ INSTALL_DIR=/opt/push_up_tracker
 SERVICE_DIR=/etc/systemd/system
 
 # Default target
-all: build
+all: help
 
 # Build the binary
 build:
@@ -40,17 +40,6 @@ test-coverage:
 	go test -coverprofile=coverage.out ./...
 	go tool cover -html=coverage.out -o coverage.html
 	@echo "Coverage report generated: coverage.html"
-
-# Run linter
-lint:
-	@if command -v golangci-lint >/dev/null 2>&1; then \
-		echo "Running linter..."; \
-		golangci-lint run; \
-	else \
-		echo "golangci-lint not found. Install with:"; \
-		echo "  go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest"; \
-		echo "  Or skip linting for now"; \
-	fi
 
 # Install binary and systemd service
 install: build
@@ -123,20 +112,19 @@ uninstall:
 # Show available targets
 help:
 	@echo "Available targets:"
-	@echo "  build           - Build the push_up_tracker binary"
-	@echo "  run             - Build and run with default settings (port 3000)"
-	@echo "  clean           - Remove build artifacts and database"
-	@echo "  deps            - Download and tidy Go dependencies"
-	@echo "  test            - Run tests"
-	@echo "  test-coverage    - Run tests with coverage report"
-	@echo "  lint            - Run linter"
-	@echo "  install         - Install binary and systemd service"
-	@echo "  uninstall       - Remove binary and systemd service"
-	@echo "  help            - Show this help message"
+	@echo "  build                   - Build the push_up_tracker binary"
+	@echo "  run                     - Build and run with default settings (port 3000)"
+	@echo "  clean                   - Remove build artifacts and database"
+	@echo "  deps                    - Download and tidy Go dependencies"
+	@echo "  test                    - Run tests"
+	@echo "  test-coverage           - Run tests with coverage report"
+	@echo "  install                 - Install binary and systemd service"
+	@echo "  uninstall               - Remove binary and systemd service"
+	@echo "  help                    - Show this help message"
 	@echo ""
 	@echo "Configuration:"
-	@echo "  .env.example    - Example environment file"
-	@echo "  .env            - Environment file (created during install)"
+	@echo "  .env.example            - Example environment file"
+	@echo "  .env                    - Environment file (created during install)"
 	@echo "  push_up_tracker.service - systemd service file"
 	@echo ""
 	@echo "Workflow:"
