@@ -1,0 +1,28 @@
+[Unit]
+Description=Push Up Tracker Web Application
+After=network.target
+
+[Service]
+Type=simple
+User=nobody
+WorkingDirectory=/opt/push_up_tracker
+ExecStart=/opt/push_up_tracker/push_up_tracker
+Restart=always
+RestartSec=10
+Environment=PORT=8080
+Environment=USERNAME=admin
+Environment=PASSWORD=admin
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/push_up_tracker
+
+# Optional: Add your custom credentials here
+# Environment=USERNAME=yourusername
+# Environment=PASSWORD=yourpassword
+
+[Install]
+WantedBy=multi-user.target

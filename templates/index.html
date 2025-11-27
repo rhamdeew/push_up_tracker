@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Push Up Tracker</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-dumbbell"></i> Push Up Tracker</h1>
+        </header>
+
+        <main>
+            <!-- Today's Section -->
+            <section class="today-section">
+                <div class="today-info">
+                    <h2>Today's Push-ups</h2>
+                    <div class="today-count" id="todayCount">-</div>
+                    <div class="today-status" id="todayStatus">Not completed</div>
+                </div>
+                <button class="complete-btn" id="completeBtn">
+                    <i class="fas fa-check"></i> Complete Today's Push-ups
+                </button>
+            </section>
+
+            <!-- Streak Section -->
+            <section class="streak-section">
+                <div class="streak-card">
+                    <h3>Current Streak</h3>
+                    <div class="streak-value" id="currentStreak">0</div>
+                    <div class="streak-label">days</div>
+                </div>
+                <div class="streak-card">
+                    <h3>Longest Streak</h3>
+                    <div class="streak-value" id="longestStreak">0</div>
+                    <div class="streak-label">days</div>
+                </div>
+            </section>
+
+            <!-- Calendar Section -->
+            <section class="calendar-section">
+                <h2>Calendar - <span id="calendarYear"></span></h2>
+                <div class="calendar-container" id="calendar">
+                    <div class="loading">Loading calendar...</div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
