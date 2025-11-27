@@ -9,9 +9,11 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/boltdb/bolt"
+	"github.com/joho/godotenv"
 )
 
 var (
@@ -34,6 +36,12 @@ type StreakData struct {
 }
 
 func main() {
+	// Load .env file if it exists
+	godotenvErr := godotenv.Load()
+	if godotenvErr != nil {
+		log.Println("No .env file found, using environment variables or defaults")
+	}
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
@@ -52,6 +60,14 @@ func main() {
 	// Initialize BoltDB
 	var err error
 	dbPath := filepath.Join(".", "pushups.db")
+	
+	// Ensure working directory is the installation directory
+	workingDir := os.Getenv("PWD")
+	if workingDir == "" {
+		workingDir = "."
+	}
+	dbPath = filepath.Join(workingDir, "pushups.db")
+	
 	db, err = bolt.Open(dbPath, 0600, nil)
 	if err != nil {
 		log.Fatal(err)
@@ -91,7 +107,18 @@ func main() {
 	http.HandleFunc("/api/calendar", basicAuth(handleCalendar, username, password))
 	http.HandleFunc("/api/streak", basicAuth(handleStreak, username, password))
 	http.HandleFunc("/static/", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, r.URL.Path[1:])
+		// Security: Validate path to prevent directory traversal
+		path := r.URL.Path[1:]
+		if !strings.HasPrefix(path, "static/") {
+			http.NotFound(w, r)
+			return
+		}
+		// Additional security: Don't serve .go files or other sensitive files
+		if strings.HasSuffix(path, ".go") || strings.Contains(path, "..") {
+			http.NotFound(w, r)
+			return
+		}
+		http.ServeFile(w, r, path)
 	})
 
 	log.Printf("Server starting on port %s", port)

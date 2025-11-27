@@ -1,2 +1,31 @@
-*.db
+# Binaries
 push_up_tracker
+push_up_tracker.exe
+
+# Database
+*.db
+
+# Environment file (keep .env.example in git)
+.env
+
+# Test coverage
+coverage.out
+coverage.html
+
+# Go modules cache
+go.sum
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.log

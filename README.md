@@ -12,9 +12,95 @@ A simple web application for tracking daily push-ups with BoltDB storage and bas
 - Basic authentication support
 - Responsive web interface
 
-## Installation
+## Quick Start with Make
 
-1. Clone or download the repository
+### Development
+```bash
+# Install dependencies
+make deps
+
+# Run locally with default settings (port 3000, admin/admin)
+make run
+
+# Build only
+make build
+
+# Clean build artifacts and database
+make clean
+```
+
+### Production Deployment
+```bash
+# Step 1: Install binary and service
+make install
+
+# Step 2: Edit configuration
+sudo nano /opt/push_up_tracker/.env
+# Change PORT, USERNAME, PASSWORD as needed
+
+# Step 3: Start the service
+sudo systemctl start push_up_tracker
+
+# Check status
+sudo systemctl status push_up_tracker
+
+# View logs
+sudo journalctl -u push_up_tracker -f
+```
+
+### Configuration
+The application can be configured using a `.env` file or environment variables:
+
+- `PORT` - Server port (default: 8080)
+- `USERNAME` - Basic auth username (default: admin)
+- `PASSWORD` - Basic auth password (default: admin)
+
+During installation, `.env.example` is copied to `/opt/push_up_tracker/.env`. Edit this file to customize your configuration.
+- Security settings in `[Service]` section
+
+### Multiple Environments
+For different configurations:
+```bash
+# Development
+make generate-service
+cp push_up_tracker.service push_up_tracker-dev.service
+# Edit dev service
+sudo cp push_up_tracker-dev.service /etc/systemd/system/
+sudo systemctl start push_up_tracker-dev
+
+# Production  
+make generate-service
+# Edit production service
+make install
+```
+
+### Uninstall
+```bash
+# Stop service and remove all files
+make uninstall
+```
+
+## Make Targets
+
+| Target | Description |
+|--------|-------------|
+| `make build` | Build `push_up_tracker` binary |
+| `make run` | Build and run with default settings (port 3000, admin/admin) |
+| `make clean` | Remove build artifacts and database |
+| `make deps` | Download and tidy Go dependencies |
+| `make test` | Run Go tests with verbose output |
+| `make test-coverage` | Run tests with coverage report (generates coverage.html) - Current coverage: ~6% |
+| `make lint` | Run Go linter (requires golangci-lint) |
+| `make generate-service` | Generate systemd service from template |
+| `make install` | Install binary and systemd service |
+| `make uninstall` | Remove binary and systemd service |
+| `make help` | Show all available targets |
+
+## Manual Installation
+
+If you prefer not to use Make:
+
+1. Clone or download repository
 2. Install dependencies:
    ```bash
    go mod tidy
@@ -26,7 +112,7 @@ A simple web application for tracking daily push-ups with BoltDB storage and bas
 
 ## Configuration
 
-Configure the application using environment variables:
+Configure application using environment variables:
 
 - `PORT`: Server port (default: 8080)
 - `USERNAME`: Basic auth username (default: admin)
@@ -63,32 +149,6 @@ The application uses BoltDB for local storage:
 - Streak bucket: Current and longest streak data
 - Config bucket: Application configuration and first record tracking
 
-## Deployment as Systemd Service
-
-1. Build the application:
-   ```bash
-   go build -o push_up_tracker main.go
-   ```
-
-2. Copy files to deployment directory:
-   ```bash
-   sudo cp -r . /opt/push_up_tracker/
-   sudo chown -R nobody:nogroup /opt/push_up_tracker
-   ```
-
-3. Install the systemd service:
-   ```bash
-   sudo cp push-up-tracker.service /etc/systemd/system/push_up_tracker.service
-   sudo systemctl daemon-reload
-   sudo systemctl enable push_up_tracker
-   sudo systemctl start push_up_tracker
-   ```
-
-4. Check status:
-   ```bash
-   sudo systemctl status push_up_tracker
-   ```
-
 ## Development
 
 The application consists of:
@@ -107,9 +167,36 @@ The application uses a progressive overload system:
 - The first day count is calculated from when the database is created, not a fixed date
 - This ensures gradual strength improvement over time
 
+## Security
+
+The application includes several security features when deployed using `make install`:
+
+### Systemd Security
+- Runs under `nobody` user (non-privileged)
+- `NoNewPrivileges=true` - Process cannot gain new privileges
+- `ProtectSystem=strict` - Read-only system access
+- `ProtectHome=true` - No access to home directories
+- `ReadWritePaths=/opt/push_up_tracker` - Only app directory writable
+- `PrivateTmp=true` - Isolated temporary directory
+- Additional hardening flags enabled
+
+### Application Security
+- Basic authentication required for all endpoints
+- Database file created with secure permissions (0600)
+- Static file serving validates paths to prevent directory traversal
+- Sensitive files (.go, .db) not accessible via web
+- Input validation on all user data
+
+### File Permissions
+- Binary owned by root, executable by nobody
+- Templates and static files owned by nobody with read permissions
+- Database file created in working directory with restricted access
+
+⚠️ **Important**: Change default credentials before production deployment!
+
 ## Calendar Features
 
-- Calendar only displays months starting from the first record in the database
+- Calendar only displays months starting from first record in database
 - Previous months can be toggled on/off for viewing historical data
 - Responsive layout: 4 months per row on desktop, 1 per row on mobile
 - Visual indicators for completed days and current date
