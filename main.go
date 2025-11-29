@@ -256,28 +256,71 @@ func setFirstDay(tx *bolt.Tx, firstDay string) error {
 func handleToday(w http.ResponseWriter, r *http.Request) {
 	today := time.Now().Format("2006-01-02")
 
-	err := db.View(func(tx *bolt.Tx) error {
+	var dayData DayData
+	err := db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("Days"))
 		data := b.Get([]byte(today))
 
 		if data == nil {
-			return fmt.Errorf("no data for today")
+			// Today's data doesn't exist, create it
+			firstDay, err := getFirstDay(tx)
+			if err != nil {
+				return err
+			}
+
+			var targetCount int
+			if firstDay == "" {
+				// Database is empty, this is initialization day
+				firstDay = today
+				err = setFirstDay(tx, firstDay)
+				if err != nil {
+					return err
+				}
+				targetCount = 10
+			} else {
+				// Calculate days since first day
+				firstDayTime, err := time.Parse("2006-01-02", firstDay)
+				if err != nil {
+					return err
+				}
+				daysSince := int(time.Since(firstDayTime).Hours() / 24)
+
+				// Apply progression rules
+				targetCount = calculateTarget(10, daysSince)
+			}
+
+			dayData = DayData{
+				Date:  today,
+				Count: targetCount,
+				Done:  false,
+			}
+
+			jsonData, err := json.Marshal(dayData)
+			if err != nil {
+				return err
+			}
+
+			err = b.Put([]byte(today), jsonData)
+			if err != nil {
+				return err
+			}
+		} else {
+			err := json.Unmarshal(data, &dayData)
+			if err != nil {
+				return err
+			}
 		}
 
-		var dayData DayData
-		err := json.Unmarshal(data, &dayData)
-		if err != nil {
-			return err
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(dayData)
 		return nil
 	})
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(dayData)
 }
 
 func handleTodayComplete(w http.ResponseWriter, r *http.Request) {

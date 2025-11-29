@@ -804,7 +804,7 @@ func TestHandleToday(t *testing.T) {
 		t.Errorf("Expected done false, got %v", response.Done)
 	}
 
-	// Test error case when no data exists
+	// Test auto-creation when no data exists
 	err = testDB.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("Days"))
 		return b.Delete([]byte(today))
@@ -819,8 +819,24 @@ func TestHandleToday(t *testing.T) {
 
 	handleToday(w, req)
 
-	if w.Code != http.StatusInternalServerError {
-		t.Errorf("Expected status 500 for missing data, got %d", w.Code)
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status 200 for auto-created data, got %d", w.Code)
+	}
+
+	// Verify the auto-created data
+	err = json.Unmarshal(w.Body.Bytes(), &response)
+	if err != nil {
+		t.Fatalf("Failed to parse response: %v", err)
+	}
+	if response.Date != today {
+		t.Errorf("Expected date %s, got %s", today, response.Date)
+	}
+	if response.Done != false {
+		t.Errorf("Expected done false, got %v", response.Done)
+	}
+	// Count should be calculated based on days since first day
+	if response.Count <= 0 {
+		t.Errorf("Expected positive count, got %d", response.Count)
 	}
 
 	// Test with invalid JSON data in database
@@ -841,6 +857,166 @@ func TestHandleToday(t *testing.T) {
 
 	if w.Code != http.StatusInternalServerError {
 		t.Errorf("Expected status 500 for invalid JSON, got %d", w.Code)
+	}
+}
+
+func TestHandleTodayOvernightScenario(t *testing.T) {
+	testDB := setupTestDB(t)
+	defer cleanupTestDB(t, testDB)
+
+	// Save original db
+	origDB := db
+	db = testDB
+	defer func() {
+		db = origDB
+	}()
+
+	// Simulate the bug scenario: server starts on day 1, keeps running into day 2
+
+	// Step 1: Set up database as if it was initialized 1 day ago
+	yesterday := time.Now().AddDate(0, 0, -1).Format("2006-01-02")
+	today := time.Now().Format("2006-01-02")
+
+	// Set firstDay to yesterday
+	err := testDB.Update(func(tx *bolt.Tx) error {
+		return setFirstDay(tx, yesterday)
+	})
+	if err != nil {
+		t.Fatalf("Failed to set firstDay: %v", err)
+	}
+
+	// Create yesterday's record with target 10
+	yesterdayData := DayData{
+		Date:  yesterday,
+		Count: 10,
+		Done:  true,
+	}
+	jsonData, _ := json.Marshal(yesterdayData)
+	err = testDB.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("Days"))
+		return b.Put([]byte(yesterday), jsonData)
+	})
+	if err != nil {
+		t.Fatalf("Failed to add yesterday's data: %v", err)
+	}
+
+	// Step 2: Simulate server running overnight - today's data doesn't exist yet
+	// This is the bug scenario: initializeTodayCount was only called on day 1
+
+	// Call handleToday - it should auto-create today's data
+	req := httptest.NewRequest("GET", "/api/today", nil)
+	req.SetBasicAuth("admin", "admin")
+	w := httptest.NewRecorder()
+
+	handleToday(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status 200, got %d", w.Code)
+	}
+
+	// Verify today's data was auto-created with correct progression
+	var response DayData
+	err = json.Unmarshal(w.Body.Bytes(), &response)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
+
+	if response.Date != today {
+		t.Errorf("Expected date %s, got %s", today, response.Date)
+	}
+
+	// Day 0: 10, Day 1: 12 (10 + 2, since count < 50)
+	expectedCount := 12
+	if response.Count != expectedCount {
+		t.Errorf("Expected count %d for day 1, got %d", expectedCount, response.Count)
+	}
+
+	if response.Done != false {
+		t.Errorf("Expected done false, got %v", response.Done)
+	}
+
+	// Step 3: Test with multiple days in the past to verify progression works
+	// Set firstDay to 5 days ago
+	fiveDaysAgo := time.Now().AddDate(0, 0, -5).Format("2006-01-02")
+	err = testDB.Update(func(tx *bolt.Tx) error {
+		return setFirstDay(tx, fiveDaysAgo)
+	})
+	if err != nil {
+		t.Fatalf("Failed to set firstDay: %v", err)
+	}
+
+	// Delete today's data to test auto-creation again
+	err = testDB.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("Days"))
+		return b.Delete([]byte(today))
+	})
+	if err != nil {
+		t.Fatalf("Failed to delete today's data: %v", err)
+	}
+
+	// Call handleToday again
+	req = httptest.NewRequest("GET", "/api/today", nil)
+	req.SetBasicAuth("admin", "admin")
+	w = httptest.NewRecorder()
+
+	handleToday(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status 200, got %d", w.Code)
+	}
+
+	err = json.Unmarshal(w.Body.Bytes(), &response)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
+
+	// Day 0: 10, Day 1: 12, Day 2: 14, Day 3: 16, Day 4: 18, Day 5: 20
+	expectedCount = 20
+	if response.Count != expectedCount {
+		t.Errorf("Expected count %d for day 5, got %d", expectedCount, response.Count)
+	}
+
+	// Step 4: Test with progression into different rate zones
+	// Set firstDay to 25 days ago (should be at 50, in the 50-99 zone where increment is +1)
+	twentyFiveDaysAgo := time.Now().AddDate(0, 0, -25).Format("2006-01-02")
+	err = testDB.Update(func(tx *bolt.Tx) error {
+		return setFirstDay(tx, twentyFiveDaysAgo)
+	})
+	if err != nil {
+		t.Fatalf("Failed to set firstDay: %v", err)
+	}
+
+	// Delete today's data
+	err = testDB.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("Days"))
+		return b.Delete([]byte(today))
+	})
+	if err != nil {
+		t.Fatalf("Failed to delete today's data: %v", err)
+	}
+
+	// Call handleToday
+	req = httptest.NewRequest("GET", "/api/today", nil)
+	req.SetBasicAuth("admin", "admin")
+	w = httptest.NewRecorder()
+
+	handleToday(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status 200, got %d", w.Code)
+	}
+
+	err = json.Unmarshal(w.Body.Bytes(), &response)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
+
+	// Day 0-19: 10 to 48 (+2 each = 38 increase)
+	// Day 20-24: 50 to 54 (+1 each = 5 increase)
+	// Day 25: 55
+	expectedCount = 55
+	if response.Count != expectedCount {
+		t.Errorf("Expected count %d for day 25, got %d", expectedCount, response.Count)
 	}
 }
 
