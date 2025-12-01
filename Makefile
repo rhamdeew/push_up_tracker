@@ -1,4 +1,4 @@
-.PHONY: build run clean all test test-coverage deps install uninstall help
+.PHONY: build run clean all test test-coverage deps install update uninstall help
 
 # Variables
 BINARY_NAME=push_up_tracker
@@ -98,6 +98,34 @@ install: build
 	@echo "- Change default credentials before production use!"
 	@echo "Check status with: sudo systemctl status $(SERVICE_FILE:.service=)"
 
+# Update existing installation
+update: build
+	@echo "Updating push_up_tracker..."
+
+	# Stop the service
+	sudo systemctl stop $(SERVICE_FILE:.service=)
+
+	# Update binary and files
+	sudo cp $(BINARY_NAME) $(INSTALL_DIR)/
+	sudo cp -r templates $(INSTALL_DIR)/
+	sudo cp -r static $(INSTALL_DIR)/
+
+	# Restore permissions
+	sudo chown nobody:nogroup $(INSTALL_DIR)/$(BINARY_NAME)
+	sudo chown -R nobody:nogroup $(INSTALL_DIR)/templates
+	sudo chown -R nobody:nogroup $(INSTALL_DIR)/static
+	sudo chmod +x $(INSTALL_DIR)/$(BINARY_NAME)
+	sudo chmod 644 $(INSTALL_DIR)/templates/*
+	sudo chmod 644 $(INSTALL_DIR)/static/*
+
+	# Restart the service
+	sudo systemctl start $(SERVICE_FILE:.service=)
+
+	@echo "Update complete!"
+	@echo "Service restarted."
+	@echo "Check status with: sudo systemctl status $(SERVICE_FILE:.service=)"
+	@echo "Note: .env configuration and database were preserved"
+
 # Uninstall binary and systemd service
 uninstall:
 	# Stop and disable service
@@ -124,6 +152,7 @@ help:
 	@echo "  test                    - Run tests"
 	@echo "  test-coverage           - Run tests with coverage report"
 	@echo "  install                 - Install binary and systemd service"
+	@echo "  update                  - Update existing installation (preserves .env and database)"
 	@echo "  uninstall               - Remove binary and systemd service"
 	@echo "  help                    - Show this help message"
 	@echo ""
@@ -136,3 +165,7 @@ help:
 	@echo "  1. make install"
 	@echo "  2. Edit /opt/push_up_tracker/.env to customize settings"
 	@echo "  3. sudo systemctl start push_up_tracker"
+	@echo ""
+	@echo "Update workflow:"
+	@echo "  1. git pull (or download new version)"
+	@echo "  2. make update"
