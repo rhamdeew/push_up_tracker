@@ -135,6 +135,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         let html = '<div class="calendar-grid-container">';
         const today = new Date();
+        // Get today's date string in local timezone to match backend
+        const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
         const currentMonth = today.getMonth();
         
         // Start from the first record month
@@ -172,8 +174,9 @@ document.addEventListener('DOMContentLoaded', function() {
             // Days of the month
             for (let day = 1; day <= lastDay.getDate(); day++) {
                 const date = new Date(currentYear, month, day);
-                const dateStr = date.toISOString().split('T')[0];
-                const isToday = dateStr === today.toISOString().split('T')[0];
+                // Create date string in local timezone to match backend format
+                const dateStr = `${currentYear}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const isToday = dateStr === todayStr;
                 
                 const dayData = data.days[dateStr];
                 const isCompleted = dayData && dayData.done;
