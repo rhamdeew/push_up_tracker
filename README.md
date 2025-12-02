@@ -8,7 +8,7 @@ A simple web application for tracking daily push-ups with BoltDB storage and bas
 [![Go Report Card](https://goreportcard.com/badge/github.com/rhamdeew/push_up_tracker)](https://goreportcard.com/report/github.com/rhamdeew/push_up_tracker)
 [![GitHub stars](https://img.shields.io/github/stars/rhamdeew/push_up_tracker)](https://github.com/rhamdeew/push_up_tracker/stargazers)
 
-![Push Up Tracker](https://github.com/user-attachments/assets/2254b540-dd1b-4400-82d1-a5e6b8bb0723)
+![Push Up Tracker](https://github.com/user-attachments/assets/4f5ec9b2-b9c8-41d9-acb4-7458a3c725df)
 
 ## Features
 
