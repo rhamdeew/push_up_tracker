@@ -55,23 +55,25 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!todayData) return;
 
         const todayCount = document.getElementById('todayCount');
+        const headerToday = document.getElementById('headerToday');
         const todayStatus = document.getElementById('todayStatus');
         const completeBtn = document.getElementById('completeBtn');
 
         todayCount.textContent = todayData.count;
-        
+        headerToday.textContent = todayData.count;
+
         if (todayData.done) {
-            todayStatus.textContent = 'Completed!';
+            todayStatus.innerHTML = '<span class="status-dot"></span><span class="status-text">Completed!</span>';
             todayStatus.classList.add('completed');
             completeBtn.disabled = true;
             completeBtn.classList.add('completed');
-            completeBtn.innerHTML = '<i class="fas fa-check-circle"></i> Completed';
+            completeBtn.innerHTML = '<span class="btn-text">COMPLETED</span><span class="btn-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 10L8 15L17 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
         } else {
-            todayStatus.textContent = 'Not completed';
+            todayStatus.innerHTML = '<span class="status-dot"></span><span class="status-text">Not completed</span>';
             todayStatus.classList.remove('completed');
             completeBtn.disabled = false;
             completeBtn.classList.remove('completed');
-            completeBtn.innerHTML = '<i class="fas fa-check"></i> Complete Today\'s Push-ups';
+            completeBtn.innerHTML = '<span class="btn-text">COMPLETE WORKOUT</span><span class="btn-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 10L8 15L17 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
         }
     }
 
@@ -93,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Create toggle button
         const toggleHTML = '<div class="calendar-controls">' +
             '<button id="togglePreviousMonths" class="toggle-btn">' +
-            '<i class="fas fa-chevron-down"></i> Show Previous Months' +
+            'SHOW PREVIOUS MONTHS' +
             '</button>' +
             '</div>';
 
@@ -119,9 +121,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         if (showPreviousMonths) {
-            toggleBtn.innerHTML = '<i class="fas fa-chevron-up"></i> Hide Previous Months';
+            toggleBtn.textContent = 'HIDE PREVIOUS MONTHS';
         } else {
-            toggleBtn.innerHTML = '<i class="fas fa-chevron-down"></i> Show Previous Months';
+            toggleBtn.textContent = 'SHOW PREVIOUS MONTHS';
         }
     }
 
@@ -182,11 +184,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 html += `<div class="${classes.join(' ')}">`;
                 html += `<span class="day-number">${day}</span>`;
-                
-                if (isCompleted) {
-                    html += '<i class="fas fa-check-circle check-icon"></i>';
-                }
-                
                 html += '</div>';
             }
             

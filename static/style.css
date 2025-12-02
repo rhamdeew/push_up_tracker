@@ -1,3 +1,41 @@
+/* ===================================
+   MODERN SPORTS APP DESIGN
+   Athletic Minimalism with Impact
+   =================================== */
+
+:root {
+    --color-bg: #0A0A0A;
+    --color-bg-elevated: #141414;
+    --color-surface: #1A1A1A;
+    --color-surface-hover: #222222;
+    --color-border: #2A2A2A;
+    --color-text-primary: #FFFFFF;
+    --color-text-secondary: #A0A0A0;
+    --color-text-tertiary: #666666;
+    --color-accent: #C9FF00;
+    --color-accent-hover: #B8EF00;
+    --color-accent-glow: rgba(201, 255, 0, 0.3);
+    --color-success: #00FF88;
+    --color-error: #FF4D4D;
+
+    --font-display: 'Bebas Neue', 'Impact', sans-serif;
+    --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+    --shadow-accent: 0 0 40px var(--color-accent-glow);
+}
+
+/* ===================================
+   BASE STYLES
+   =================================== */
+
 * {
     margin: 0;
     padding: 0;
@@ -5,185 +43,449 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    font-family: var(--font-body);
+    background: var(--color-bg);
+    color: var(--color-text-primary);
     min-height: 100vh;
-    color: #333;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Grain texture overlay for athletic feel */
+.grain-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    mix-blend-mode: overlay;
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 24px;
+    position: relative;
 }
+
+/* ===================================
+   HEADER
+   =================================== */
 
 header {
-    text-align: center;
-    margin-bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 32px 0 48px;
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: 48px;
 }
 
-header h1 {
-    color: white;
-    font-size: 2.5rem;
-    font-weight: 700;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 16px;
 }
 
-header h1 i {
-    margin-right: 10px;
+.logo-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--color-accent);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-bg);
+    animation: pulse 2s ease-in-out infinite;
 }
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.logo h1 {
+    font-family: var(--font-display);
+    font-size: 32px;
+    letter-spacing: 2px;
+    font-weight: 400;
+    color: var(--color-text-primary);
+}
+
+.header-stats {
+    display: flex;
+    gap: 32px;
+}
+
+.header-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.stat-label {
+    font-family: var(--font-display);
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    color: var(--color-text-tertiary);
+}
+
+.stat-value {
+    font-family: var(--font-display);
+    font-size: 28px;
+    letter-spacing: 1px;
+    color: var(--color-accent);
+}
+
+/* ===================================
+   HERO SECTION
+   =================================== */
 
 main {
     display: grid;
-    gap: 30px;
+    gap: 32px;
+    animation: fadeInUp 0.6s ease-out;
 }
 
-.today-section {
-    background: white;
-    border-radius: 20px;
-    padding: 30px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    text-align: center;
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.today-info h2 {
-    font-size: 1.8rem;
-    color: #333;
-    margin-bottom: 20px;
+.hero-section {
+    background: linear-gradient(135deg, var(--color-surface) 0%, var(--color-bg-elevated) 100%);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: 64px 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 48px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    transition: all 0.3s ease;
 }
 
-.today-count {
-    font-size: 4rem;
-    font-weight: bold;
-    color: #667eea;
-    margin-bottom: 10px;
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, var(--color-accent-glow) 0%, transparent 70%);
+    pointer-events: none;
+    opacity: 0.1;
 }
 
-.today-status {
-    font-size: 1.2rem;
-    color: #666;
-    margin-bottom: 30px;
+.hero-section:hover {
+    border-color: var(--color-accent);
+    box-shadow: var(--shadow-lg), var(--shadow-accent);
 }
 
-.today-status.completed {
-    color: #28a745;
-    font-weight: 600;
+.hero-content {
+    flex: 1;
+}
+
+.hero-label {
+    font-family: var(--font-display);
+    font-size: 18px;
+    letter-spacing: 3px;
+    color: var(--color-text-tertiary);
+    margin-bottom: 16px;
+}
+
+.hero-count {
+    font-family: var(--font-display);
+    font-size: 120px;
+    line-height: 1;
+    letter-spacing: 2px;
+    color: var(--color-accent);
+    margin-bottom: 24px;
+    text-shadow: 0 0 60px var(--color-accent-glow);
+    animation: countPulse 2s ease-in-out infinite;
+}
+
+@keyframes countPulse {
+    0%, 100% {
+        text-shadow: 0 0 60px var(--color-accent-glow);
+    }
+    50% {
+        text-shadow: 0 0 80px var(--color-accent-glow);
+    }
+}
+
+.hero-status {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+}
+
+.status-dot {
+    width: 12px;
+    height: 12px;
+    background: var(--color-text-tertiary);
+    border-radius: 50%;
+    animation: dotPulse 2s ease-in-out infinite;
+}
+
+@keyframes dotPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+.hero-status.completed .status-dot {
+    background: var(--color-success);
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+}
+
+.hero-status.completed .status-text {
+    color: var(--color-success);
+}
+
+.hero-action {
+    flex-shrink: 0;
 }
 
 .complete-btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: var(--color-accent);
+    color: var(--color-bg);
     border: none;
-    padding: 15px 30px;
-    font-size: 1.1rem;
-    border-radius: 50px;
+    padding: 24px 48px;
+    font-family: var(--font-display);
+    font-size: 20px;
+    letter-spacing: 2px;
+    border-radius: var(--radius-lg);
     cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--shadow-md), 0 0 40px var(--color-accent-glow);
+    position: relative;
+    overflow: hidden;
+}
+
+.complete-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s ease;
+}
+
+.complete-btn:hover::before {
+    left: 100%;
 }
 
 .complete-btn:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    background: var(--color-accent-hover);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: var(--shadow-lg), 0 0 60px var(--color-accent-glow);
+}
+
+.complete-btn:active:not(:disabled) {
+    transform: translateY(0) scale(0.98);
 }
 
 .complete-btn:disabled {
-    opacity: 0.6;
+    opacity: 0.4;
     cursor: not-allowed;
-    background: #ccc;
+    transform: none;
 }
 
 .complete-btn.completed {
-    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    background: var(--color-success);
+    box-shadow: var(--shadow-md), 0 0 40px rgba(0, 255, 136, 0.3);
 }
 
-.streak-section {
+.btn-icon {
+    display: flex;
+    align-items: center;
+}
+
+/* ===================================
+   STATS GRID
+   =================================== */
+
+.stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+    animation: fadeInUp 0.6s ease-out 0.1s backwards;
 }
 
-.streak-card {
-    background: white;
-    border-radius: 15px;
-    padding: 25px;
-    text-align: center;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+.stat-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: default;
+}
+
+.stat-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--color-accent);
+    transform: scaleX(0);
+    transform-origin: left;
     transition: transform 0.3s ease;
 }
 
-.streak-card:hover {
-    transform: translateY(-5px);
+.stat-card:hover {
+    background: var(--color-surface-hover);
+    border-color: var(--color-accent);
+    transform: translateY(-4px);
 }
 
-.streak-card h3 {
-    font-size: 1.2rem;
-    color: #666;
-    margin-bottom: 10px;
+.stat-card:hover::after {
+    transform: scaleX(1);
 }
 
-.streak-value {
-    font-size: 3rem;
-    font-weight: bold;
-    color: #667eea;
-    margin-bottom: 5px;
+.stat-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
 }
 
-.streak-label {
-    font-size: 1rem;
-    color: #999;
+.stat-card-label {
+    font-family: var(--font-display);
+    font-size: 14px;
+    letter-spacing: 2px;
+    color: var(--color-text-tertiary);
 }
+
+.stat-card-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(201, 255, 0, 0.1);
+    border-radius: var(--radius-sm);
+    color: var(--color-accent);
+}
+
+.stat-card-value {
+    font-family: var(--font-display);
+    font-size: 72px;
+    line-height: 1;
+    letter-spacing: 1px;
+    color: var(--color-text-primary);
+    margin-bottom: 8px;
+}
+
+.stat-card-unit {
+    font-family: var(--font-display);
+    font-size: 16px;
+    letter-spacing: 2px;
+    color: var(--color-text-secondary);
+}
+
+/* ===================================
+   CALENDAR SECTION
+   =================================== */
 
 .calendar-section {
-    background: white;
-    border-radius: 20px;
-    padding: 30px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: 48px;
+    animation: fadeInUp 0.6s ease-out 0.2s backwards;
 }
 
-.calendar-section h2 {
-    font-size: 1.8rem;
-    color: #333;
-    margin-bottom: 20px;
-    text-align: center;
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--color-border);
 }
 
-.calendar-container {
-    margin-top: 20px;
+.section-header h2 {
+    font-family: var(--font-display);
+    font-size: 28px;
+    letter-spacing: 3px;
+    font-weight: 400;
+}
+
+.section-year {
+    font-family: var(--font-display);
+    font-size: 24px;
+    letter-spacing: 2px;
+    color: var(--color-text-tertiary);
 }
 
 .calendar-controls {
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 32px;
 }
 
 .toggle-btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 25px;
+    background: var(--color-bg-elevated);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+    padding: 12px 24px;
+    border-radius: var(--radius-md);
     cursor: pointer;
-    font-size: 1rem;
+    font-family: var(--font-display);
+    font-size: 14px;
+    letter-spacing: 1.5px;
     transition: all 0.3s ease;
-    box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
 }
 
 .toggle-btn:hover {
+    background: var(--color-surface-hover);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
     transform: translateY(-1px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
 }
 
 .calendar-grid-container {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
 }
 
 .calendar-month {
-    border: 1px solid #e0e0e0;
-    border-radius: 12px;
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
     overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.calendar-month:hover {
+    border-color: var(--color-accent);
+    transform: translateY(-2px);
 }
 
 .calendar-month.previous-month {
@@ -191,136 +493,244 @@ main {
 }
 
 .month-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: var(--color-surface);
+    color: var(--color-text-primary);
     text-align: center;
-    padding: 12px;
-    font-size: 1.1rem;
-    font-weight: 600;
+    padding: 16px;
+    font-family: var(--font-display);
+    font-size: 18px;
+    letter-spacing: 2px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.calendar-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: var(--color-bg-elevated);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.calendar-header-cell {
+    text-align: center;
+    font-family: var(--font-display);
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--color-text-tertiary);
+    padding: 12px 4px;
 }
 
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 1px;
-    background-color: #e0e0e0;
-}
-
-.calendar-header {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 1px;
-    background-color: #e0e0e0;
-}
-
-.calendar-header-cell {
-    text-align: center;
-    font-weight: bold;
-    color: #666;
-    padding: 8px 2px;
-    font-size: 0.8rem;
-    background: #f8f9fa;
+    background-color: var(--color-border);
 }
 
 .calendar-day {
     aspect-ratio: 1;
-    border-radius: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-size: 0.8rem;
-    color: #333;
-    background: white;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    background: var(--color-bg-elevated);
     position: relative;
-    min-height: 35px;
-    transition: background-color 0.2s ease;
+    min-height: 42px;
+    transition: all 0.2s ease;
+    cursor: default;
 }
 
 .calendar-day:hover {
-    background-color: #f0f8ff;
+    background: var(--color-surface);
 }
 
 .calendar-day.empty {
-    background: #f8f9fa;
+    background: var(--color-bg);
     color: transparent;
+    cursor: default;
+}
+
+.calendar-day.empty:hover {
+    background: var(--color-bg);
 }
 
 .calendar-day.completed {
-    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-    color: white;
+    background: var(--color-accent);
+    color: var(--color-bg);
+    font-weight: 700;
+}
+
+.calendar-day.completed:hover {
+    background: var(--color-accent-hover);
+    transform: scale(1.1);
+    z-index: 10;
 }
 
 .calendar-day.today {
-    border: 2px solid #667eea;
-    font-weight: bold;
-    background: #f0f8ff;
+    outline: 2px solid var(--color-accent);
+    outline-offset: -2px;
+    font-weight: 700;
+    background: var(--color-surface);
 }
 
 .calendar-day.today.completed {
-    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    background: var(--color-accent);
+    outline-color: var(--color-text-primary);
 }
 
-.calendar-day .day-number {
-    font-size: 0.8rem;
-    font-weight: 500;
+.day-number {
+    font-size: 14px;
+    font-weight: 600;
 }
 
-.calendar-day .check-icon {
-    font-size: 0.6rem;
-    margin-top: 1px;
+.check-icon {
+    margin-top: 2px;
+    font-size: 10px;
 }
+
+/* ===================================
+   LOADING STATE
+   =================================== */
 
 .loading {
     text-align: center;
-    padding: 40px;
-    color: #666;
-    font-size: 1.1rem;
+    padding: 80px 40px;
+    color: var(--color-text-secondary);
+    font-size: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--color-border);
+    border-top-color: var(--color-accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ===================================
+   RESPONSIVE DESIGN
+   =================================== */
+
+@media (max-width: 1024px) {
+    .calendar-grid-container {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 20px;
+    }
+
+    .hero-section {
+        padding: 48px 32px;
+    }
+
+    .hero-count {
+        font-size: 96px;
+    }
 }
 
 @media (max-width: 768px) {
     .container {
-        padding: 10px;
+        padding: 16px;
     }
-    
-    header h1 {
-        font-size: 2rem;
+
+    header {
+        flex-direction: column;
+        gap: 24px;
+        text-align: center;
+        padding: 24px 0 32px;
+        margin-bottom: 32px;
     }
-    
-    .today-count {
-        font-size: 3rem;
+
+    .logo {
+        flex-direction: column;
+        gap: 12px;
     }
-    
-    .streak-value {
-        font-size: 2.5rem;
+
+    .logo h1 {
+        font-size: 24px;
     }
-    
+
+    .header-stats {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .hero-section {
+        flex-direction: column;
+        padding: 40px 24px;
+        text-align: center;
+    }
+
+    .hero-count {
+        font-size: 80px;
+    }
+
+    .complete-btn {
+        padding: 20px 40px;
+        font-size: 18px;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .stat-card {
+        padding: 24px;
+    }
+
+    .stat-card-value {
+        font-size: 56px;
+    }
+
+    .calendar-section {
+        padding: 32px 20px;
+    }
+
+    .section-header {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+    }
+
+    .section-header h2 {
+        font-size: 22px;
+    }
+
     .calendar-grid-container {
         grid-template-columns: 1fr;
-        gap: 15px;
+        gap: 16px;
     }
-    
+
     .calendar-day {
-        min-height: 30px;
-        font-size: 0.7rem;
+        min-height: 36px;
+        font-size: 13px;
     }
-    
-    .calendar-day .day-number {
-        font-size: 0.7rem;
+}
+
+@media (max-width: 480px) {
+    .hero-count {
+        font-size: 64px;
     }
-    
-    .calendar-header-cell {
-        padding: 6px 1px;
-        font-size: 0.6rem;
+
+    .stat-card-value {
+        font-size: 48px;
     }
-    
-    .month-header {
-        padding: 8px;
-        font-size: 0.9rem;
-    }
-    
-    .toggle-btn {
-        padding: 8px 16px;
-        font-size: 0.9rem;
+
+    .complete-btn {
+        padding: 16px 32px;
+        font-size: 16px;
     }
 }
