@@ -148,15 +148,29 @@ func initializeTodayCount() {
 				}
 				todayTarget = 10
 			} else {
-				// Calculate days since first day
-				firstDayTime, err := time.Parse("2006-01-02", firstDay)
-				if err != nil {
-					return err
-				}
-				daysSince := int(time.Since(firstDayTime).Hours() / 24)
+				// Calculate target based on yesterday's completion
+				todayTime, _ := time.Parse("2006-01-02", today)
+				yesterday := todayTime.AddDate(0, 0, -1).Format("2006-01-02")
 
-				// Apply new progression rules
-				todayTarget = calculateTarget(10, daysSince)
+				yesterdayData := b.Get([]byte(yesterday))
+				if yesterdayData != nil {
+					var yesterdayDayData DayData
+					err := json.Unmarshal(yesterdayData, &yesterdayDayData)
+					if err != nil {
+						return err
+					}
+
+					if yesterdayDayData.Done {
+						// Yesterday was completed, apply progression
+						todayTarget = calculateNextTarget(yesterdayDayData.Count, tx)
+					} else {
+						// Yesterday was skipped, keep same target
+						todayTarget = yesterdayDayData.Count
+					}
+				} else {
+					// No yesterday data, start with 10
+					todayTarget = 10
+				}
 			}
 
 			dayData := DayData{
@@ -193,7 +207,7 @@ func initializeTodayCount() {
 	}
 }
 
-// calculateTarget calculates the target count based on progression rules
+// calculateTarget calculates the target count based on progression rules (legacy)
 func calculateTarget(startCount, daysSince int) int {
 	target := startCount
 
@@ -218,6 +232,56 @@ func calculateTarget(startCount, daysSince int) int {
 	}
 
 	return target
+}
+
+// calculateNextTarget calculates the next target based on current count and completion
+func calculateNextTarget(currentCount int, tx *bolt.Tx) int {
+	if currentCount >= 200 {
+		return 200
+	}
+
+	if currentCount < 50 {
+		// Increase by 2 when count < 50
+		return currentCount + 2
+	} else if currentCount >= 50 && currentCount < 100 {
+		// Increase by 1 when count >= 50 and < 100
+		return currentCount + 1
+	} else if currentCount >= 100 && currentCount < 200 {
+		// Increase by 1 every 2 completed days when count >= 100 and < 200
+		daysAtLevel := getDaysAtCurrentLevel(tx)
+		if daysAtLevel >= 1 {
+			// We've been at this level for 2 days (yesterday + day before), time to increase
+			setDaysAtCurrentLevel(tx, 0)
+			newTarget := currentCount + 1
+			if newTarget > 200 {
+				return 200
+			}
+			return newTarget
+		} else {
+			// First day at this level, don't increase yet
+			setDaysAtCurrentLevel(tx, daysAtLevel+1)
+			return currentCount
+		}
+	}
+
+	return currentCount
+}
+
+// getDaysAtCurrentLevel retrieves the counter for days at current level (for 100-200 range)
+func getDaysAtCurrentLevel(tx *bolt.Tx) int {
+	b := tx.Bucket([]byte("Config"))
+	data := b.Get([]byte("daysAtLevel"))
+	if data == nil {
+		return 0
+	}
+	days, _ := strconv.Atoi(string(data))
+	return days
+}
+
+// setDaysAtCurrentLevel sets the counter for days at current level
+func setDaysAtCurrentLevel(tx *bolt.Tx, days int) error {
+	b := tx.Bucket([]byte("Config"))
+	return b.Put([]byte("daysAtLevel"), []byte(strconv.Itoa(days)))
 }
 
 func basicAuth(next http.HandlerFunc, username, password string) http.HandlerFunc {
@@ -278,15 +342,29 @@ func handleToday(w http.ResponseWriter, r *http.Request) {
 				}
 				targetCount = 10
 			} else {
-				// Calculate days since first day
-				firstDayTime, err := time.Parse("2006-01-02", firstDay)
-				if err != nil {
-					return err
-				}
-				daysSince := int(time.Since(firstDayTime).Hours() / 24)
+				// Calculate target based on yesterday's completion
+				todayTime, _ := time.Parse("2006-01-02", today)
+				yesterday := todayTime.AddDate(0, 0, -1).Format("2006-01-02")
 
-				// Apply progression rules
-				targetCount = calculateTarget(10, daysSince)
+				yesterdayData := b.Get([]byte(yesterday))
+				if yesterdayData != nil {
+					var yesterdayDayData DayData
+					err := json.Unmarshal(yesterdayData, &yesterdayDayData)
+					if err != nil {
+						return err
+					}
+
+					if yesterdayDayData.Done {
+						// Yesterday was completed, apply progression
+						targetCount = calculateNextTarget(yesterdayDayData.Count, tx)
+					} else {
+						// Yesterday was skipped, keep same target
+						targetCount = yesterdayDayData.Count
+					}
+				} else {
+					// No yesterday data, start with 10
+					targetCount = 10
+				}
 			}
 
 			dayData = DayData{
